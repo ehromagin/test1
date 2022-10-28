@@ -16,8 +16,8 @@
             <td>{{ $el->last }}</td>
             <td>{{ $el->function }}</td>
             <td>
-                <i class="far fa-edit"></i>
-                <i class="far fa-trash-alt"></i>
+                <button class="edit" data-id="{{ $el->id }}"><i class="far fa-edit"></i></button>
+                <button class="delete" data-id="{{ $el->id }}"><i class="far fa-trash-alt"></i></button>
             </td>
         </tr>
     @endforeach

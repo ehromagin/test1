@@ -5,6 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Laravel</title>
     <!-- Bootstrap CSS (jsDelivr CDN) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"
@@ -35,7 +36,7 @@
 <div class="container">
     <h1 class="text-center">Test Telenorma AG</h1>
     <form id="user-form" method="POST" action="{{route('contact-form')}}" class="col-md-6">
-        @csrf
+        <input type="hidden" id="id" name="id" />
         <div class="mb-3">
             <label for="first" class="form-label">First</label>
             <input type="text" name="first" placeholder="Enter your name" class="form-control" id="first">
@@ -47,10 +48,10 @@
         <div class="mb-3">
             <label for="function" class="form-label">Function</label>
             <select class="form-select" name="function" aria-label="Default select example" id="function">
-                <option selected>Choose a position</option>
-                <option value="1">Programmer</option>
-                <option value="2">Manager</option>
-                <option value="3">Tester</option>
+                <option value="0" selected>Choose a position</option>
+                <option value="Programmer">Programmer</option>
+                <option value="Manager">Manager</option>
+                <option value="Tester">Tester</option>
             </select>
         </div>
 
@@ -63,24 +64,83 @@
 
 </div>
 <script>
-    $(document).ready(function() {
-        $("#btnSubmit").click(function(e){
+    $(document).ready(function () {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $("#btnSubmit").click(function (e) {
             e.preventDefault();
             const data = $("#user-form").serialize();
             console.log(data);
             $.ajax({
-                type : "post",
-                url  : "{{route('contact-form')}}",
-                data : data,
-                success : function(data){
+                type: "post",
+                url: "{{route('contact-form')}}",
+                data: data,
+                success: function (data) {
                     console.info(data);
                     $("#table-container").html(data);
+                    $('#id').val('');
+                    $('#first').val('');
+                    $('#last').val('');
+                    $('#function').val('0');
+
+                    initButtons();
                 },
-                error: function(xhr){
+                error: function (xhr) {
                     console.error("Error: " + xhr.status + " " + xhr.statusText);
                 }
             });
         });
+
+        function initButtons() {
+            $(".delete").on('click', function (e) {
+                e.preventDefault();
+                console.log(this);
+                const id = $(this).data('id');
+                console.log(id);
+                $.ajax({
+                    type: "delete",
+                    url: "{{route('worker.delete')}}",
+                    data: {id: id},
+                    success: function (data) {
+                        console.info(data);
+                        $("#table-container").html(data);
+
+                        initButtons();
+                    },
+                    error: function (xhr) {
+                        console.error("Error: " + xhr.status + " " + xhr.statusText);
+                    }
+                });
+            });
+            $(".edit").on('click', function (e) {
+                e.preventDefault();
+                console.log(this);
+                const id = $(this).data('id');
+                console.log(id);
+                $.ajax({
+                    type: "get",
+                    url: "{{route('get-worker')}}",
+                    data: {id: id},
+                    success: function (data) {
+                        console.info(data);
+                        $('#id').val(data.id);
+                        $('#first').val(data.first);
+                        $('#last').val(data.last);
+                        $('#function').val(data.function);
+
+                    },
+                    error: function (xhr) {
+                        console.error("Error: " + xhr.status + " " + xhr.statusText);
+                    }
+                });
+            });
+        }
+
+        initButtons();
     });
 </script>
 </body>

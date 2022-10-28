@@ -20,4 +20,8 @@ Route::get('/', function () {
 
 Route::get('/workers', [WorkersController::class, 'allData'])->name('workers');
 
-Route::post('/workers/submit', 'App\Http\Controllers\WorkersController@submit')->name('contact-form');
+Route::post('/workers/submit', [WorkersController::class, 'submit'])->name('contact-form');
+
+Route::get('/get-worker', [WorkersController::class, 'getWorker'])->name('get-worker');
+
+Route::delete('/workers', [WorkersController::class, 'delete'])->name('worker.delete');
